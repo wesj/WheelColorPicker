@@ -1,0 +1,56 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.Base.AppCompat.Light">
+    </style>
+
+    <style name="color_picker">
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Wheel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="SeekBarBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">2dp</item>
+    </style>
+
+    <style name="SeekBar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:progressDrawable">@android:color/transparent</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+    </style>
+
+    <style name="SeekSpacer">
+        <item name="android:visibility">gone</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="Edit">
+        <item name="android:background">@android:drawable/edit_text</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:numeric">integer</item>
+        <item name="android:text">0</item>
+        <item name="android:gravity">right</item>
+        <item name="android:layout_height">40sp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
+    <style name="Edit.Inner">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+</resources>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.example.myapplication2.Wheel style="@style/Wheel"
+        android:id="@+id/wheel"/>
+
+        <ViewFlipper android:id="@+id/sliderBox"
+            style="@style/SeekBarBox"
+            android:inAnimation="@android:anim/slide_in_left"
+            android:outAnimation="@android:anim/slide_out_right">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <com.example.myapplication2.SeekBar android:id="@+id/hueSeekbar"
+                    style="@style/SeekBar"
+                    android:paddingLeft="0dp"
+                    android:paddingRight="0dp"/>
+
+                <View style="@style/SeekSpacer"/>
+
+                <com.example.myapplication2.SeekBar android:id="@+id/satSeekbar"
+                    style="@style/SeekBar"/>
+
+                <View style="@style/SeekSpacer"/>
+
+                <com.example.myapplication2.SeekBar android:id="@+id/valSeekbar"
+                    style="@style/SeekBar"/>
+
+                <View style="@style/SeekSpacer"/>
+
+                <LinearLayout
+                    style="@style/SeekBar"
+                    android:orientation="horizontal">
+
+                    <TextView android:id="@+id/hsvLabel"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:layout_height="wrap_content"
+                        android:text="HSV:"/>
+
+                    <EditText style="@style/Edit"
+                        android:id="@+id/hueLabel"/>
+
+                    <LinearLayout style="@style/Edit">
+
+                        <EditText style="@style/Edit.Inner"
+                            android:id="@+id/satLabel"/>
+
+                        <TextView
+                            android:id="@+id/value_unit_symbol"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="%"
+                            android:gravity="center_vertical"
+                            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/Edit">
+
+                        <EditText style="@style/Edit.Inner"
+                            android:id="@+id/valLabel"/>
+
+                        <TextView
+                            android:id="@+id/value_unit_symbol"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="%"
+                            android:gravity="center_vertical"
+                            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <com.example.myapplication2.SeekBar android:id="@+id/redSeekbar"
+                    style="@style/SeekBar"/>
+
+                <View style="@style/SeekSpacer"/>
+
+                <com.example.myapplication2.SeekBar android:id="@+id/greenSeekbar"
+                    style="@style/SeekBar"/>
+
+                <View style="@style/SeekSpacer"/>
+
+                <com.example.myapplication2.SeekBar android:id="@+id/blueSeekbar"
+                    style="@style/SeekBar"/>
+
+                <View style="@style/SeekSpacer"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView android:id="@+id/rgbLabel"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:layout_height="wrap_content"
+                        android:text="RGB:"/>
+
+                    <EditText style="@style/Edit"
+                        android:id="@+id/redLabel"/>
+
+                    <EditText style="@style/Edit"
+                        android:id="@+id/greenLabel"/>
+
+                    <EditText style="@style/Edit"
+                        android:id="@+id/blueLabel"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </ViewFlipper>
+
+</merge>
