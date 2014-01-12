@@ -1,9 +1,10 @@
 package com.example.myapplication2;
 
+import android.os.Build;
 import android.view.View;
 
 /**
- * Created by wesj on 1/11/14.
+ * Abstract class to animate a particular set of values on a view.
  */
 abstract class Animator<T> {
     protected T mStart;
@@ -47,6 +48,10 @@ abstract class Animator<T> {
         float dt = (float)(now - startTime);
         stepAnimation(dt/DURATION);
 
-        mView.postInvalidateOnAnimation();
+        if (Build.VERSION.SDK_INT >= 16) {
+            mView.postInvalidateOnAnimation();
+        } else {
+            mView.postInvalidateDelayed(30/1000);
+        }
     }
 }

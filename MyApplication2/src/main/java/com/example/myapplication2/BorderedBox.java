@@ -67,13 +67,6 @@ public class BorderedBox extends Drawable {
     }
 
     public void setBorderRadius(float r) { mRadius = r; }
-    public void setIntrinsicWidth(int w) { mWidth = w; }
-    public void setIntrinsicHeight(int h) { mHeight = h; }
-    @Override
-    public int getIntrinsicWidth() { return mWidth; }
-    @Override
-    public int getIntrinsicHeight() { return mHeight; }
-
     public void setShadowOffset(PointF p) { mShadowOffset = p; }
 
     public void setBorderThickness(int r) {
