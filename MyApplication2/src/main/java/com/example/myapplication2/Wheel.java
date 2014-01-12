@@ -1,7 +1,5 @@
 package com.example.myapplication2;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -9,44 +7,114 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RemoteViews;
 
 /**
- * Example of writing a custom layout manager.  This is a fairly full-featured
- * layout manager that is relatively general, handling all layout cases.  You
- * can simplify it for more specific cases.
+ * View group that lays out items in a cirlce. Dragging on the view will rotate the items around the circle
  */
 @RemoteViews.RemoteView
 public class Wheel extends ViewGroup {
     private static final String LOGTAG = "Wheel";
-    private float MAX_OFFSET = 40;
-    private static final int MIN_RADIUS = 100;
 
-    private int mInnerWidth = 80;
-    private Path mPath;
+    // TODO: Make these DPI independent
+    private float MAX_OFFSET = 40; // Number of pixels that selected view is "offset" by the path builder
+
+    // The center of the wheel in percent of the wheel's width and height.
     private float mCy = 0.5f;
     private float mCx = 0.5f;
-    private float mRotation = -180.0f + 360/20;
-    private WheelListener mListener;
-    private Paint mCenterPaint;
-    private Path mBasePath;
 
-    private double mStartDragRotation = 0;
-    private int mRadius;
-    private int mSliceAngle;
-    private int mSelectedAngle;
-    private int mSliceHeight;
+    private float mRotation = -180.0f + 360/20; // Current rotation
+    private WheelListener mListener; // Listener to be notified when the wheel changes
 
-    private float endRotation = 0;
-    private float angVelocity = 0;
-    private long prevTime = 0;
+    // TODO: These is pretty specific to the color picker.. Need a better solution
+    private Paint mCenterPaint;// Paint a dot in the center of the view
+    private int mInnerWidth;    // Width of an inner circle. Used to draw inner circle
 
-    public Wheel(Context context) {
-        this(context, null);
+    private double mStartDragRotation = 0; // The initial rotation when a user starts dragging
+    private int mRadius; // The radius of slices. Determined by where the center is positioned
+
+    private int mSliceAngle; // Cached total angle covered by a sliced
+    private int mSelectedAngle; // Cached angle to show as "selected"
+    private int mSliceHeight; // Cached height of a slice.
+
+    private Animator mAnimator; // An animtor to use when snapping back to a selected position
+    private PathBuilder mPathBuilder; // Builds a clip path for the view. By default views are clipped to a wedge
+
+    // Listener for changes to the selected wedge
+    public static interface WheelListener {
+        public void onChange(int index);
+    }
+
+    // Interface for setting a clip on views.
+    public static abstract class PathBuilder {
+        protected float mCx;
+        protected float mCy;
+
+        public PathBuilder(float cx, float cy) {
+            mCx = cx;
+            mCy = cy;
+        }
+
+        public abstract Path getPath(float angle, int w, int h, float offset);
+
+        public void setCenter(float cx, float cy) {
+            mCx = cx;
+            mCy = cy;
+        }
+    }
+
+    // Implementation of a PathBuilder that creates a wedge
+    public static class WedgeBuilder extends PathBuilder {
+        private Path mPath;
+        private Path mBasePath;
+        private int mInnerRadius = 80;
+
+        public WedgeBuilder(int innerRadius, int cx, int cy) {
+            super(cx, cy);
+            mInnerRadius = innerRadius;
+        }
+
+        public Path getPath(float angle, int w, int h, float offset) {
+            if (offset == 0) {
+                if (mPath == null) {
+                    mPath = new Path(buildPath(angle, w, h, offset));
+                }
+                return mPath;
+            }
+
+            Path p = buildPath(angle, w, h, offset);
+            p.offset(offset, 0);
+            return p;
+        }
+
+        private Path buildPath(float angle, int w, int h, float offset) {
+            if (mBasePath == null) {
+                mBasePath = new Path();
+            }
+
+            mBasePath.rewind();
+            angle /= 2;
+            double a = angle * Math.PI/180f;
+            int iw = (int) (mInnerRadius * 1.5f - offset);
+
+            double cos = Math.cos(a);
+            double sin = Math.sin(a);
+            mBasePath.moveTo((int) (iw * cos),
+                    (int) (iw * sin));
+            mBasePath.lineTo((int) (w * cos),
+                    (int) (w * sin));
+            mBasePath.arcTo(new RectF(-w, -w, w, w), angle, -2f * angle);
+            mBasePath.lineTo((int)     (iw * cos),
+                    (int) (-1* iw * sin));
+            mBasePath.arcTo(new RectF(-iw, -iw, iw, iw), -angle, 2f * angle);
+            mBasePath.close();
+
+            mBasePath.offset(mCx, mCy);
+            return mBasePath;
+        }
     }
 
     public Wheel(Context context, AttributeSet attrs) {
@@ -55,20 +123,15 @@ public class Wheel extends ViewGroup {
 
     public Wheel(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        init(context);
+        init();
     }
 
-    /**
-     * Any layout manager that doesn't scroll will want this.
-     */
     @Override
     public boolean shouldDelayChildPressedState() {
         return false;
     }
 
-    @SuppressLint("NewApi")
-    private void init(Context context) {
-        setLayerType(View.LAYER_TYPE_HARDWARE, null);
+    private void init() {
         mCenterPaint = new Paint();
     }
 
@@ -76,7 +139,6 @@ public class Wheel extends ViewGroup {
      * Ask all children to measure themselves and compute the measurement of this
      * layout based on the children.
      */
-    @SuppressLint("NewApi")
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int count = getChildCount();
@@ -95,19 +157,33 @@ public class Wheel extends ViewGroup {
                 measureChild(child, widthMeasureSpec, heightMeasureSpec);
                 maxWidth = Math.max(maxWidth, child.getMeasuredWidth());
                 maxHeight = Math.max(maxHeight, child.getMeasuredHeight());
-                childState = combineMeasuredStates(childState, child.getMeasuredState());
+                if (Build.VERSION.SDK_INT >= 11) {
+                    childState = combineMeasuredStates(childState, child.getMeasuredState());
+                }
             }
         }
 
+        int w = 0;
+        int h = 0;
+        if (Build.VERSION.SDK_INT >= 16) {
+            w = getMinimumWidth();
+            h = getMinimumHeight();
+        }
+
         // Check against our minimum height and width
-        maxHeight = Math.max(maxHeight, getMinimumHeight());
-        maxWidth  = Math.max(maxWidth, getMinimumWidth());
+        maxHeight = Math.max(maxHeight, h);
+        maxWidth  = Math.max(maxWidth, w);
         setupRadius(maxWidth, maxHeight);
         maxHeight = maxWidth = mRadius;
 
          // Report our final dimensions.
-        setMeasuredDimension(resolveSizeAndState(maxWidth,  widthMeasureSpec,  childState),
-                             resolveSizeAndState(maxHeight, heightMeasureSpec, childState << MEASURED_HEIGHT_STATE_SHIFT));
+        if (Build.VERSION.SDK_INT >= 11) {
+            setMeasuredDimension(resolveSizeAndState(maxWidth,  widthMeasureSpec,  childState),
+                                 resolveSizeAndState(maxHeight, heightMeasureSpec, childState << MEASURED_HEIGHT_STATE_SHIFT));
+        } else {
+            setMeasuredDimension(resolveSize(maxWidth, widthMeasureSpec),
+                                 resolveSize(maxHeight, heightMeasureSpec));
+        }
     }
 
     private void setupRadius(int width, int height) {
@@ -119,7 +195,7 @@ public class Wheel extends ViewGroup {
 
         int y = cy;
         if (mCy < 0.5) y = (int) ((1-mCy) * height);
-        mRadius = Math.max(Math.min(x, y), MIN_RADIUS);
+        mRadius = Math.min(x, y);
         MAX_OFFSET = mRadius*0.1f;
     }
 
@@ -128,22 +204,7 @@ public class Wheel extends ViewGroup {
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        mPath = null;
-        mBasePath = null;
-
         final int count = getChildCount();
-
-        // These are the far left and right edges in which we are performing layout.
-        int leftPos = getPaddingLeft();
-        int rightPos = right - left - getPaddingRight();
-
-        // This is the middle region inside of the gutter.
-        final int middleLeft = leftPos;
-        final int middleRight = rightPos;
-
-        // These are the top and bottom edges in which we are performing layout.
-        final int parentTop = getPaddingTop();
-        final int parentBottom = bottom - top - getPaddingBottom();
 
         mSliceAngle = 360 / count;
         int w = getMeasuredWidth();
@@ -157,9 +218,10 @@ public class Wheel extends ViewGroup {
         if (mCx > 0.5) mSelectedAngle += 180;
 
         mInnerWidth = (int) (mRadius * 0.2f);
+        mPathBuilder = new WedgeBuilder(mInnerWidth, cx, cy);
 
         mSliceHeight = (int) (mRadius/Math.atan(mSliceAngle/2));
-        cy -= (int) (mSliceHeight);
+        cy -= mSliceHeight;
 
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
@@ -170,17 +232,16 @@ public class Wheel extends ViewGroup {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.FROYO)
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        int action = event.getActionMasked();
-
-        if (action == MotionEvent.ACTION_DOWN) {
-            return startDrag(event);
-        } else if (action == MotionEvent.ACTION_MOVE) {
-            return drag(event);
-        } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            return endDrag(event);
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN:
+                return startDrag(event);
+            case MotionEvent.ACTION_MOVE:
+                return drag(event);
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                return endDrag(event);
         }
         return false;
     }
@@ -190,70 +251,21 @@ public class Wheel extends ViewGroup {
 
         // animate to the nearest color...
         int r = Math.round((mRotation - mSliceAngle/2)/mSliceAngle);
-        animateTo(r * mSliceAngle + (mSelectedAngle % mSliceAngle));
+        mAnimator = new WheelAnimator(r * mSliceAngle + (mSelectedAngle % mSliceAngle) %360);
 
         return true;
-    }
-
-    private Path getPath(float angle, int w, int h, float offset) {
-        if (offset == 0) {
-            if (mPath == null) {
-                mPath = new Path(buildPath(angle, w, h, offset));
-            }
-            return mPath;
-        }
-
-        Path p = buildPath(angle, w, h, offset);
-        p.offset(offset, 0);
-        return p;
-    }
-
-    private Path buildPath(float angle, int w, int h, float offset) {
-        if (mBasePath == null) {
-            mBasePath = new Path();
-        }
-
-        mBasePath.rewind();
-        angle /= 2;
-        double a = angle * Math.PI/180f;
-        int iw = (int) (mInnerWidth * 1.5f - offset);
-
-        double cos = Math.cos(a);
-        double sin = Math.sin(a);
-        mBasePath.moveTo((int) (iw * cos),
-                         (int) (iw * sin));
-        mBasePath.lineTo((int) (w * cos),
-                         (int) (w * sin));
-        mBasePath.arcTo(new RectF(-w, -w, w, w), angle, -2f * angle);
-        mBasePath.lineTo((int)     (iw * cos),
-                         (int) (-1* iw * sin));
-        mBasePath.arcTo(new RectF(-iw, -iw, iw, iw), -angle, 2f * angle);
-        mBasePath.close();
-
-        mBasePath.offset((int) (mCx * getMeasuredWidth()),
-                         (int) (mCy * getMeasuredHeight()));
-        return mBasePath;
-    }
-
-    @SuppressLint("NewApi")
-    private void animateTo(float rotation) {
-        endRotation = rotation % 360;
-        angVelocity = ((mRotation - rotation > 0) ? -1f : 1f) * 50;
-        prevTime = System.currentTimeMillis();
-
-        postInvalidateOnAnimation();
-    }
-
-    private void endAnimation() {
-        endRotation = 0;
-        angVelocity = 0;
-        prevTime = 0;
     }
 
     public void setSelectedSegment(int i) {
         int count = getChildCount();
         int angle = 360 / count;
-        animateTo(180 - angle * i + angle / 2);
+        if (mAnimator != null)
+            mAnimator.endAnimation();
+
+        if (Build.VERSION.SDK_INT >= 11) {
+            setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        }
+        mAnimator = new WheelAnimator((180 - angle * i + angle / 2)%360);
     }
 
     public void setColor(int color) {
@@ -263,10 +275,13 @@ public class Wheel extends ViewGroup {
     public void setCenter(float x, float y) {
         mCx = x;
         mCy = y;
+        if (mPathBuilder != null) {
+            mPathBuilder.setCenter(mCx, mCy);
+        }
     }
 
-    public static interface WheelListener {
-        public void onChange(int index);
+    public void setPathBuilder(PathBuilder builder) {
+        mPathBuilder = builder;
     }
 
     public void addListener(WheelListener listener) {
@@ -287,20 +302,24 @@ public class Wheel extends ViewGroup {
         }
     }
 
-    @SuppressLint("NewApi")
-    private void animateStep() {
-        if (angVelocity != 0f) {
-            long now = System.currentTimeMillis();
-            long dt = now - prevTime;
-            mRotation += angVelocity * dt / 1000f;
-            if ((mRotation-endRotation) * angVelocity >= 0) {
-                mRotation = endRotation;
-                endAnimation();
-                notifyListeners();
-            } else {
-                prevTime = now;
+    private class WheelAnimator extends Animator<Float> {
+        public WheelAnimator(float end) {
+            super(Wheel.this, mRotation, end);
+        }
+
+        @Override
+        protected void endAnimation() {
+            mRotation = mEnd;
+            notifyListeners();
+            mAnimator = null;
+            if (Build.VERSION.SDK_INT >= 11) {
+                setLayerType(View.LAYER_TYPE_SOFTWARE, null);
             }
-            postInvalidateOnAnimation();
+        }
+
+        @Override
+        protected void stepAnimation(float dt) {
+            mRotation = mStart + (mEnd - mStart)* dt / 1000f;
         }
     }
 
@@ -319,7 +338,13 @@ public class Wheel extends ViewGroup {
     }
 
     private boolean startDrag(MotionEvent event) {
-        endAnimation();
+        if (mAnimator != null)
+            mAnimator.endAnimation();
+
+        if (Build.VERSION.SDK_INT >= 11) {
+            setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        }
+
         mStartDragRotation = getAngle(event);
         return true;
     }
@@ -351,18 +376,20 @@ public class Wheel extends ViewGroup {
         }
 
         int state = canvas.save();
-
-        // TODO: Angle, W, and H are constants. Move them out of here
         float a = (mRotation + mSliceAngle*i) % 360;
-        float offset = Math.max(0, MAX_OFFSET - (a- mSelectedAngle)*(a- mSelectedAngle)/mSliceAngle*4f);
-
         canvas.rotate(mRotation + mSliceAngle * i, getMeasuredWidth() * mCx, getMeasuredHeight() * mCy);
-        canvas.clipPath(getPath(mSliceAngle, (int) (mRadius - MAX_OFFSET), mSliceHeight, offset));
+
+        // TODO: This interface is too specific to our wedges
+        if (mPathBuilder != null) {
+            float offset = Math.max(0, MAX_OFFSET - (a- mSelectedAngle)*(a- mSelectedAngle)/mSliceAngle*4f);
+            canvas.clipPath(mPathBuilder.getPath(mSliceAngle, (int) (mRadius - MAX_OFFSET), mSliceHeight, offset));
+        }
 
         super.drawChild(canvas, child, drawingTime);
 
         canvas.restoreToCount(state);
-        animateStep();
+        if (mAnimator != null)
+            mAnimator.step();
 
         return true;
     }

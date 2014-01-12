@@ -1,6 +1,5 @@
 package com.example.myapplication2;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -27,8 +26,9 @@ import android.widget.ViewFlipper;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Created by wesj on 12/11/13.
+/*
+ * A Color picker class that display a wheel of default colors at the top, and a set of draggable
+ * seekbars below/to the right (depending on orientation).
  */
 public class AdvancedColorPicker extends LinearLayout {
     private static final String LOGTAG = "AdvancedColorPicker";
@@ -88,7 +88,8 @@ public class AdvancedColorPicker extends LinearLayout {
         this(context, attrs, 0);
     }
 
-    @SuppressLint("NewApi")
+    /* This constructor is only available for LinearLayouts on Honeycomb */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public AdvancedColorPicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         LayoutInflater inflater = LayoutInflater.from(context);
@@ -120,9 +121,18 @@ public class AdvancedColorPicker extends LinearLayout {
             }
         });
         Display display;
-        display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
+        WindowManager wm = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE));
+        Point size = new Point(0, 0);
+        if (wm != null) {
+            display = wm.getDefaultDisplay();
+            if (Build.VERSION.SDK_INT >= 13) {
+                display.getSize(size);
+            } else {
+                size.x = display.getWidth();
+                size.y = display.getHeight();
+            }
+        }
+
         if (size.x > size.y) {
             setOrientation(HORIZONTAL);
             wheel.setCenter(1.02f, 0.5f);
@@ -144,8 +154,7 @@ public class AdvancedColorPicker extends LinearLayout {
         hsvLabel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mColor = Color.HSVToColor(mHSV);
-                updateGradients(mColor);
+                setColor(Color.HSVToColor(mHSV));
                 flipper.showNext();
                 mCurrentMode = RGB;
             }
@@ -165,7 +174,6 @@ public class AdvancedColorPicker extends LinearLayout {
         updateGradients(mHSV);
     }
 
-    @SuppressLint("NewApi")
     private Bar findBar(final int seekbarId, final int labelId, final int type) {
         BorderedBox border = new BorderedBox();
         border.setBorderRadius(1);
@@ -181,7 +189,11 @@ public class AdvancedColorPicker extends LinearLayout {
         if (type != HUE) {
             bar.seekbar.setProgressDrawable(border);
         } else {
-            bar.seekbar.setBackground(new ShapeDrawable(new RectShape()));
+            if (Build.VERSION.SDK_INT >= 16) {
+                bar.seekbar.setBackground(new ShapeDrawable(new RectShape()));
+            } else {
+                bar.seekbar.setBackgroundDrawable(new ShapeDrawable(new RectShape()));
+            }
         }
 
         bar.label.addTextChangedListener(new TextWatcher() {
@@ -200,8 +212,11 @@ public class AdvancedColorPicker extends LinearLayout {
 
                 float val = 0;
                 try {
-                    val = Float.parseFloat(bar.label.getText().toString());
-                } catch (Exception ex) { }
+                    CharSequence text = bar.label.getText();
+                    val = Float.parseFloat(text.toString());
+                } catch (NullPointerException ex) {
+                    Log.i(LOGTAG, "Invalid float", ex);
+                }
 
                 switch (type) {
                     case HUE: setHSV(val, mHSV[1], mHSV[2]); break;
@@ -209,12 +224,10 @@ public class AdvancedColorPicker extends LinearLayout {
                     case VAL: setHSV(mHSV[0], mHSV[1], val / 100f); break;
                     default:
                         switch(type) {
-                            case RED: mColor = Color.rgb((int) val, Color.green(mColor), Color.blue(mColor)); break;
-                            case BLUE: mColor = Color.rgb(Color.red(mColor), Color.green(mColor), (int) val); break;
-                            case GREEN: mColor = Color.rgb(Color.red(mColor), (int) val, Color.blue(mColor)); break;
+                            case RED: setRGB((int) val, Color.green(mColor), Color.blue(mColor)); break;
+                            case BLUE: setRGB(Color.red(mColor), Color.green(mColor), (int) val); break;
+                            case GREEN: setRGB(Color.red(mColor), (int) val, Color.blue(mColor)); break;
                         }
-                        updateGradients(mColor);
-                        setWheel(mColor);
                 }
             }
         });
@@ -230,12 +243,10 @@ public class AdvancedColorPicker extends LinearLayout {
                     case VAL: setHSV(mHSV[0], mHSV[1], progress / 100f);        break;
                     default:
                         switch (type) {
-                            case RED:   mColor = Color.rgb((int) (progress / 100f * 255f), Color.green(mColor), Color.blue(mColor)); break;
-                            case BLUE:  mColor = Color.rgb(Color.red(mColor), Color.green(mColor), (int) (progress / 100f * 255f)); break;
-                            case GREEN: mColor = Color.rgb(Color.red(mColor), (int) (progress / 100f * 255f), Color.blue(mColor)); break;
+                            case RED:   setRGB((int) (progress / 100f * 255f), Color.green(mColor), Color.blue(mColor)); break;
+                            case BLUE:  setRGB(Color.red(mColor), Color.green(mColor), (int) (progress / 100f * 255f)); break;
+                            case GREEN: setRGB(Color.red(mColor), (int) (progress / 100f * 255f), Color.blue(mColor)); break;
                         }
-                        updateGradients(mColor);
-                        setWheel(mColor);
                 }
             }
 
@@ -255,7 +266,6 @@ public class AdvancedColorPicker extends LinearLayout {
         setWheel(Color.HSVToColor(hsv));
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void updateGradients(float[] hsv) {
         if (mUpdating) return;
         mUpdating = true;
@@ -319,78 +329,29 @@ public class AdvancedColorPicker extends LinearLayout {
         mSatBar.label.setText(Integer.toString(Math.round(mHSV[1] * 100)));
         mValBar.label.setText(Integer.toString(Math.round(mHSV[2] * 100)));
 
-        int color = Color.HSVToColor(mHSV);
-        mRedBar.label.setText(Integer.toString(Color.red(color)));
-        mBlueBar.label.setText(Integer.toString(Color.blue(color)));
-        mGreenBar.label.setText(Integer.toString(Color.green(color)));
+        mRedBar.label.setText(Integer.toString(Color.red(mColor)));
+        mBlueBar.label.setText(Integer.toString(Color.blue(mColor)));
+        mGreenBar.label.setText(Integer.toString(Color.green(mColor)));
         mUpdating = false;
-    }
-
-    private abstract class Animator<T> {
-        protected T mStart;
-        protected T mEnd;
-        protected long DURATION = 500;
-        private long startTime = -1;
-
-        abstract protected void endAnimation();
-        abstract protected void stepAnimation(float dt);
-
-        public Animator(T start, T end) {
-            mStart = start;
-            mEnd = end;
-        }
-
-        public void start() {
-            startTime = System.currentTimeMillis();
-            step();
-        }
-
-        private void stop() {
-            mStart = null;
-            startTime = -1;
-            endAnimation();
-            mEnd = null;
-        }
-
-        public void step() {
-            if (mEnd == null) {
-                return;
-            }
-
-            long now = System.currentTimeMillis();
-            if (now > startTime + DURATION) {
-                stop();
-                return;
-            }
-
-            float dt = (float)(now - startTime);
-            stepAnimation(dt/DURATION);
-
-            postInvalidateOnAnimation();
-        }
     }
 
     private class ColorAnimator extends Animator<int[]> {
         public ColorAnimator(int[] start, int[] end) {
-            super(start, end);
+            super(AdvancedColorPicker.this, start, end);
         }
 
         @Override
         protected void endAnimation() {
-            mColor = Color.rgb(mEnd[0], mEnd[1], mEnd[2]);
-            updateGradients(mColor);
-            setWheel(mColor);
+            setRGB(mEnd[0], mEnd[1], mEnd[2]);
             updateLabels();
             mAnimator = null;
         }
 
         @Override
         protected void stepAnimation(float dt) {
-            mColor = Color.rgb((int) (mStart[0] + (mEnd[0] - mStart[0])*dt),
+            setColor(Color.rgb((int) (mStart[0] + (mEnd[0] - mStart[0])*dt),
                                (int) (mStart[1] + (mEnd[1] - mStart[1])*dt),
-                               (int) (mStart[2] + (mEnd[2] - mStart[2])*dt));
-            updateGradients(mColor);
-            setWheel(mColor);
+                               (int) (mStart[2] + (mEnd[2] - mStart[2])*dt)));
         }
     }
 
@@ -401,7 +362,7 @@ public class AdvancedColorPicker extends LinearLayout {
 
     private class HSVAnimator extends Animator<float[]> {
         public HSVAnimator(float[] start, float[] end) {
-            super(start, end);
+            super(AdvancedColorPicker.this, start, end);
         }
 
         @Override
@@ -417,12 +378,22 @@ public class AdvancedColorPicker extends LinearLayout {
                     mStart[1] + (mEnd[1] - mStart[1]) * dt,
                     mStart[2] + (mEnd[2] - mStart[2]) * dt);
         }
-    };
+    }
 
     public void dispatchDraw(Canvas canvas) {
         if (mAnimator != null)
             mAnimator.step();
         super.dispatchDraw(canvas);
+    }
+
+    private void setRGB(int r, int g, int b) {
+        setColor(Color.rgb(r, g, b));
+    }
+
+    private void setColor(int color) {
+        mColor = color;
+        updateGradients(mColor);
+        setWheel(mColor);
     }
 
     private void setHSV(float h, float s, float v) {
