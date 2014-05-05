@@ -251,7 +251,7 @@ public class Wheel extends ViewGroup {
 
         // animate to the nearest color...
         int r = Math.round((mRotation - mSliceAngle/2)/mSliceAngle);
-        mAnimator = new WheelAnimator(r * mSliceAngle + (mSelectedAngle % mSliceAngle) %360);
+        mAnimator = new WheelAnimator(r * mSliceAngle + (mSelectedAngle % mSliceAngle) % 360);
 
         return true;
     }
@@ -388,8 +388,9 @@ public class Wheel extends ViewGroup {
         super.drawChild(canvas, child, drawingTime);
 
         canvas.restoreToCount(state);
-        if (mAnimator != null)
+        if (mAnimator != null) {
             mAnimator.step();
+        }
 
         return true;
     }

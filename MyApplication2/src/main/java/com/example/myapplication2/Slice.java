@@ -13,6 +13,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 /**
@@ -23,9 +24,7 @@ public class Slice extends View {
     private static final String LOGTAG = "Slice";
     private static Path mPath;
     private static Paint mPaint = new Paint();
-    private static Paint mInnerRing = new Paint();
     private static int mStrokeWidth = 40;
-    private static int mInnerWidth = 120;
     private float mAngle;
     private float mRadius;
     private float mOffset;
@@ -45,50 +44,47 @@ public class Slice extends View {
         init(context);
     }
 
+    @Override
+    public void setBackgroundColor(int color) {
+        Log.i(LOGTAG, "Set color " + color);
+        mPaint.setColor(color);
+        super.setBackgroundColor(color);
+    }
+
     private void init(Context context) {
-        mInnerRing.setColor(Color.argb(20, 0, 0, 0));
-        mInnerRing.setStrokeWidth(mStrokeWidth);
-        mInnerRing.setStyle(Paint.Style.FILL);
-
         Drawable d = getBackground();
+        Log.i(LOGTAG, "Get background " + d);
         int color = Color.BLACK;
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-            // http://stackoverflow.com/questions/8089054/get-the-background-color-of-a-button-in-android
-            // If the ColorDrawable makes use of its bounds in the draw method,
-            // we may not be able to get the color we want. This is not the usual
-            // case before Ice Cream Sandwich (4.0.1 r1).
-            // Yet, we change the bounds temporarily, just to be sure that we are
-            // successful.
-            ColorDrawable colorDrawable = (ColorDrawable) d;
+        if (d instanceof ColorDrawable) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+                // http://stackoverflow.com/questions/8089054/get-the-background-color-of-a-button-in-android
+                // If the ColorDrawable makes use of its bounds in the draw method,
+                // we may not be able to get the color we want. This is not the usual
+                // case before Ice Cream Sandwich (4.0.1 r1).
+                // Yet, we change the bounds temporarily, just to be sure that we are
+                // successful.
+                ColorDrawable colorDrawable = (ColorDrawable) d;
 
-            Rect bounds = new Rect();
-            bounds.set(colorDrawable.getBounds()); // Save the original bounds.
-            colorDrawable.setBounds(0, 0, 1, 1); // Change the bounds.
+                Rect bounds = new Rect();
+                bounds.set(colorDrawable.getBounds()); // Save the original bounds.
+                colorDrawable.setBounds(0, 0, 1, 1); // Change the bounds.
 
-            Bitmap bitmap = Bitmap.createBitmap(1,1, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            colorDrawable.draw(canvas);
-            color = bitmap.getPixel(0, 0);
+                Bitmap bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                colorDrawable.draw(canvas);
+                color = bitmap.getPixel(0, 0);
 
-            colorDrawable.setBounds(bounds); // Restore the original bounds.
-        } else {
-            color = ((ColorDrawable) d).getColor();
+                colorDrawable.setBounds(bounds); // Restore the original bounds.
+            } else {
+                color = ((ColorDrawable) d).getColor();
+            }
         }
+
         mPaint.setColor(color);
     }
 
     protected void onConfigurationChanged (Configuration newConfig) {
         mPath = null;
-    }
-
-    public void draw(Canvas canvas) {
-        int w = getWidth();
-
-        int save = canvas.save();
-        canvas.drawRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), mPaint);
-        canvas.drawCircle(0, getHeight()/2, mInnerWidth + mStrokeWidth, mInnerRing);
-
-        canvas.restoreToCount(save);
     }
 
     public void setParams(float angle, float r, float offset) {

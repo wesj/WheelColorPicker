@@ -81,6 +81,13 @@ public class BorderedBox extends Drawable {
     public void setColorFilter(ColorFilter cf) { }
 
     @Override
+    public int getIntrinsicWidth() { return mWidth; }
+    @Override
+    public int getIntrinsicHeight() { return mHeight; }
+    public void setIntrinsicWidth(int width) { mWidth = width; }
+    public void setIntrinsicHeight(int height) { mHeight = height; }
+
+    @Override
     public int getOpacity() { return 0; }
 
     public void setColor(int color) { mCenter.setColor(color); }
