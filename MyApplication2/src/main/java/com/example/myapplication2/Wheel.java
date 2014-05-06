@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.RemoteViews;
 
 /**
- * View group that lays out items in a cirlce. Dragging on the view will rotate the items around the circle
+ * View group that lays out items in a circle. Dragging on the view will rotate the items around the circle
  */
 @RemoteViews.RemoteView
 public class Wheel extends ViewGroup {

@@ -42,7 +42,8 @@ public class AdvancedColorPicker extends LinearLayout {
     // Conversions between HSV and RGB can be lossy, so we store both
     // separately so that all of the sliders can move independently
     private float[] mHSV = new float[] { 0f, 1f, 1f };
-    private int mColor = Color.BLACK;
+    // TODO: use CYAN for now, to ease debug. Revert back to black as default value later.
+    private int mColor = Color.CYAN;//BLACK;
 
     private Bar mHueBar;
     private Bar mSatBar;
@@ -94,7 +95,7 @@ public class AdvancedColorPicker extends LinearLayout {
         super(context, attrs, defStyle);
         LayoutInflater inflater = LayoutInflater.from(context);
         inflater.inflate(R.layout.advanced_color_picker, this);
-        Color.colorToHSV(DEFAULT_COLORS.get(2), mHSV);
+        Color.colorToHSV(mColor, mHSV);
 
         wheel = (Wheel) findViewById(R.id.wheel);
         for (Integer i : DEFAULT_COLORS) {
@@ -172,6 +173,8 @@ public class AdvancedColorPicker extends LinearLayout {
         });
 
         updateGradients(mHSV);
+        setColor(mColor);
+        updateLabels();
     }
 
     private Bar findBar(final int seekbarId, final int labelId, final int type) {
@@ -276,15 +279,15 @@ public class AdvancedColorPicker extends LinearLayout {
             grad[i] = Color.HSVToColor(new float[]{360*i/(SIZE-1), hsv[1], hsv[2]});
         }
 
-        mHueBar.seekbar.setBackgroundGradientColors(grad, mHueBar.seekbar.getMeasuredWidth());
+        mHueBar.seekbar.setBackgroundGradientColors(grad);
         mSatBar.seekbar.setGradientColors(new int[] {
                 Color.HSVToColor(new float[]{hsv[0], 1, hsv[2]}),
                 Color.HSVToColor(new float[]{hsv[0], 0, hsv[2]}),
-        }, mSatBar.seekbar.getMeasuredWidth());
+        });
         mValBar.seekbar.setGradientColors(new int[] {
                 Color.HSVToColor(new float[]{hsv[0], hsv[1], 0}),
                 Color.HSVToColor(new float[]{hsv[0], hsv[1], 1}),
-        }, mValBar.seekbar.getMeasuredWidth());
+        });
 
         int color = Color.HSVToColor(hsv);
         mHueBar.seekbar.setThumbColor(color);
@@ -305,9 +308,9 @@ public class AdvancedColorPicker extends LinearLayout {
         int r = Color.red(color);
         int g = Color.green(color);
         int b = Color.blue(color);
-        mRedBar.seekbar.setGradientColors(new int[]{Color.rgb(0, g, b), Color.rgb(255, g, b)}, mRedBar.seekbar.getMeasuredWidth());
-        mGreenBar.seekbar.setGradientColors(new int[]{Color.rgb(r, 0, b), Color.rgb(r, 255, b)}, mGreenBar.seekbar.getMeasuredWidth());
-        mBlueBar.seekbar.setGradientColors(new int[]{Color.rgb(r, g, 0), Color.rgb(r, g, 255)}, mBlueBar.seekbar.getMeasuredWidth());
+        mRedBar.seekbar.setGradientColors(new int[]{Color.rgb(0, g, b), Color.rgb(255, g, b)});
+        mGreenBar.seekbar.setGradientColors(new int[]{Color.rgb(r, 0, b), Color.rgb(r, 255, b)});
+        mBlueBar.seekbar.setGradientColors(new int[]{Color.rgb(r, g, 0), Color.rgb(r, g, 255)});
 
         mRedBar.seekbar.setThumbColor(color);
         mGreenBar.seekbar.setThumbColor(color);
