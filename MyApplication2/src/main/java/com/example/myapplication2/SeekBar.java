@@ -29,7 +29,7 @@ public class SeekBar extends android.widget.SeekBar {
     }
 
     private void init(Context context) {
-        mThumb = new BorderedBox();
+        mThumb = new BorderedBox(context);
         mThumb.setBorderThickness(5);
         mThumb.setBorderRadius(1f);
         mThumb.setShadowOffset(new PointF(0, 2));

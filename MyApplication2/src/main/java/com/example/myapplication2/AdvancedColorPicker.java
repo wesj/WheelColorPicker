@@ -142,13 +142,13 @@ public class AdvancedColorPicker extends LinearLayout {
             wheel.setCenter(0.5f, 1.02f);
         }
 
-        mHueBar = findBar(R.id.hueSeekbar, R.id.hueLabel, HUE);
-        mSatBar = findBar(R.id.satSeekbar, R.id.satLabel, SAT);
-        mValBar = findBar(R.id.valSeekbar, R.id.valLabel, VAL);
+        mHueBar = findBar(context, R.id.hueSeekbar, R.id.hueLabel, HUE);
+        mSatBar = findBar(context, R.id.satSeekbar, R.id.satLabel, SAT);
+        mValBar = findBar(context, R.id.valSeekbar, R.id.valLabel, VAL);
 
-        mRedBar = findBar(R.id.redSeekbar, R.id.redLabel, RED);
-        mGreenBar = findBar(R.id.greenSeekbar, R.id.greenLabel, GREEN);
-        mBlueBar = findBar(R.id.blueSeekbar, R.id.blueLabel, BLUE);
+        mRedBar = findBar(context, R.id.redSeekbar, R.id.redLabel, RED);
+        mGreenBar = findBar(context, R.id.greenSeekbar, R.id.greenLabel, GREEN);
+        mBlueBar = findBar(context, R.id.blueSeekbar, R.id.blueLabel, BLUE);
 
 
         TextView hsvLabel = (TextView) findViewById(R.id.hsvLabel);
@@ -177,11 +177,10 @@ public class AdvancedColorPicker extends LinearLayout {
         updateLabels();
     }
 
-    private Bar findBar(final int seekbarId, final int labelId, final int type) {
-        BorderedBox border = new BorderedBox();
+    private Bar findBar(Context context, final int seekbarId, final int labelId, final int type) {
+        BorderedBox border = new BorderedBox(context);
         border.setBorderRadius(1);
         border.setBorderThickness(3);
-        border.setBorderColor(Color.LTGRAY);
         border.setShadowInset(true);
         border.setShadowShader(new LinearGradient(0f, 0f, 0f, 50, new int[] {
                 Color.argb(100,0,0,0), Color.argb(0,0,0,0)

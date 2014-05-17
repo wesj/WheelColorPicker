@@ -54,7 +54,7 @@
                         <EditText style="@style/Edit.Inner"
                             android:id="@+id/satLabel"/>
 
-                        <TextView
+                        <TextView style="@style/TextView"
                             android:id="@+id/sat_value_unit_symbol"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
@@ -69,7 +69,7 @@
                         <EditText style="@style/Edit.Inner"
                             android:id="@+id/valLabel"/>
 
-                        <TextView
+                        <TextView style="@style/TextView"
                             android:id="@+id/val_value_unit_symbol"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
