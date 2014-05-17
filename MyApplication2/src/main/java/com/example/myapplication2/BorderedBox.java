@@ -19,7 +19,6 @@ public class BorderedBox extends Drawable {
     private final Paint mBorderPaint;
     private final Paint mCenter;
     private float mRadius = 0;
-    private int mBorderWidth = 0;
     private PointF mShadowOffset = new PointF(0,0);
     private int mWidth = -1;
     private int mHeight = -1;

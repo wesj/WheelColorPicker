@@ -22,11 +22,7 @@ import android.view.View;
 public class Slice extends View {
 
     private static final String LOGTAG = "Slice";
-    private static Path mPath;
     private static Paint mPaint = new Paint();
-    private static int mStrokeWidth = 40;
-    private float mAngle;
-    private float mRadius;
     private float mOffset;
 
     public Slice(Context context) {

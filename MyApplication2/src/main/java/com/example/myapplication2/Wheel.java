@@ -226,7 +226,6 @@ public class Wheel extends ViewGroup {
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() != GONE) {
-                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
                 child.layout(cx, cy, cx + mRadius, cy + 2*mSliceHeight);
             }
         }
