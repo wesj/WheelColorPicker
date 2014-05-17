@@ -49,35 +49,27 @@
                     <EditText style="@style/Edit"
                         android:id="@+id/hueLabel"/>
 
-                    <LinearLayout style="@style/Edit">
+                    <EditText style="@style/Edit"
+                        android:id="@+id/satLabel"/>
 
-                        <EditText style="@style/Edit.Inner"
-                            android:id="@+id/satLabel"/>
+                    <TextView
+                        android:id="@+id/sat_value_unit_symbol"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="%"
+                        android:gravity="center_vertical"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                        <TextView style="@style/TextView"
-                            android:id="@+id/sat_value_unit_symbol"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:text="%"
-                            android:gravity="center_vertical"
-                            android:textAppearance="?android:attr/textAppearanceMedium" />
+                    <EditText style="@style/Edit"
+                        android:id="@+id/valLabel"/>
 
-                    </LinearLayout>
-
-                    <LinearLayout style="@style/Edit">
-
-                        <EditText style="@style/Edit.Inner"
-                            android:id="@+id/valLabel"/>
-
-                        <TextView style="@style/TextView"
-                            android:id="@+id/val_value_unit_symbol"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:text="%"
-                            android:gravity="center_vertical"
-                            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/val_value_unit_symbol"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="%"
+                        android:gravity="center_vertical"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 </LinearLayout>
             </LinearLayout>
