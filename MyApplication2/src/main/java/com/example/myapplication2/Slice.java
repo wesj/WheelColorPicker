@@ -79,13 +79,7 @@ public class Slice extends View {
         mPaint.setColor(color);
     }
 
-    protected void onConfigurationChanged (Configuration newConfig) {
-        mPath = null;
-    }
-
     public void setParams(float angle, float r, float offset) {
-        mAngle = angle;
-        mRadius = r;
         if (mOffset != offset) {
             mOffset = offset;
         }
