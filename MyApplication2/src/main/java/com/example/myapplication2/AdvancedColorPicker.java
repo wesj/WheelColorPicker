@@ -216,7 +216,7 @@ public class AdvancedColorPicker extends LinearLayout {
                 try {
                     CharSequence text = bar.label.getText();
                     val = Float.parseFloat(text.toString());
-                } catch (NullPointerException ex) {
+                } catch (NumberFormatException ex) {
                     Log.i(LOGTAG, "Invalid float", ex);
                 }
 
