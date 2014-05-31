@@ -392,10 +392,14 @@ public class AdvancedColorPicker extends LinearLayout {
         setColor(Color.rgb(r, g, b));
     }
 
-    private void setColor(int color) {
+    public void setColor(int color) {
         mColor = color;
         updateGradients(mColor);
         setWheel(mColor);
+    }
+
+    public int getColor() {
+        return mColor;
     }
 
     private void setHSV(float h, float s, float v) {
