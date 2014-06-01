@@ -258,11 +258,8 @@ public class Wheel extends ViewGroup {
     public void setSelectedSegment(int i) {
         int count = getChildCount();
         int angle = 360 / count;
-        if (mAnimator != null)
+        if (mAnimator != null) {
             mAnimator.endAnimation();
-
-        if (Build.VERSION.SDK_INT >= 11) {
-            setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }
         mAnimator = new WheelAnimator((180 - angle * i + angle / 2)%360);
     }
@@ -311,9 +308,6 @@ public class Wheel extends ViewGroup {
             mRotation = mEnd;
             notifyListeners();
             mAnimator = null;
-            if (Build.VERSION.SDK_INT >= 11) {
-                setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-            }
         }
 
         @Override
@@ -337,13 +331,9 @@ public class Wheel extends ViewGroup {
     }
 
     private boolean startDrag(MotionEvent event) {
-        if (mAnimator != null)
+        if (mAnimator != null) {
             mAnimator.endAnimation();
-
-        if (Build.VERSION.SDK_INT >= 11) {
-            setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }
-
         mStartDragRotation = getAngle(event);
         return true;
     }
