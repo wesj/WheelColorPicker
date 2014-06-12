@@ -20,16 +20,18 @@ public class MainActivity extends Activity {
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                final AdvancedColorPicker acp = new AdvancedColorPicker(MainActivity.this);
                 (new AlertDialog.Builder(MainActivity.this))
                         .setTitle("Pick a color")
-                        .setView(new AdvancedColorPicker(MainActivity.this))
+                        .setView(acp)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();;
+                                dialog.dismiss();
                             }
                         }).create()
                         .show();
+                acp.setColor(0);
             }
         });
     }

@@ -394,7 +394,10 @@ public class AdvancedColorPicker extends LinearLayout {
 
     public void setColor(int color) {
         mColor = color;
+        Color.colorToHSV(mColor, mHSV);
         updateGradients(mColor);
+        updateGradients(mHSV);
+        updateLabels();
         setWheel(mColor);
     }
 
@@ -408,5 +411,7 @@ public class AdvancedColorPicker extends LinearLayout {
         mHSV[2] = v;
         updateGradients(mHSV);
         setWheel(mHSV);
+        mColor = Color.HSVToColor(mHSV);
+        updateGradients(mColor);
     }
 }
