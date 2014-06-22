@@ -53,7 +53,7 @@ public class SeekBar extends android.widget.SeekBar {
     private void updateGradient() {
         if (mGradientColors == null || mGradientColors.length == 0)
             return;
-        setGrad(getProgressDrawable(), mGradientColors);
+        setGradient(getProgressDrawable(), mGradientColors);
         invalidate();
     }
 
@@ -65,11 +65,11 @@ public class SeekBar extends android.widget.SeekBar {
     private void updateBackgroundGradient() {
         if (mBackgroundColors == null || mBackgroundColors.length == 0)
             return;
-        setGrad(getBackground(), mBackgroundColors);
+        setGradient(getBackground(), mBackgroundColors);
         invalidate();
     }
 
-    private void setGrad(Drawable d, int[] colors) {
+    private void setGradient(Drawable d, int[] colors) {
         if (d == null)
             return;
 
