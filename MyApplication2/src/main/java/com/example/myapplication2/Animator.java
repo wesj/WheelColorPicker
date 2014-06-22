@@ -45,7 +45,7 @@ abstract class Animator<T> {
             return;
         }
 
-        float dt = (float)(now - startTime);
+        float dt = now - startTime;
         stepAnimation(dt/DURATION);
 
         if (Build.VERSION.SDK_INT >= 16) {

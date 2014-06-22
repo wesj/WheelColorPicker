@@ -37,7 +37,7 @@ public class SeekBar extends android.widget.SeekBar {
         mThumb.setIntrinsicHeight(65);
         setThumb(mThumb);
     }
-    
+
     @Override
     protected void onSizeChanged (int w, int h, int oldw, int oldh) {
     	super.onSizeChanged(w, h, oldw, oldh);
@@ -49,19 +49,19 @@ public class SeekBar extends android.widget.SeekBar {
         mGradientColors = colors;
         updateGradient();
     }
-    
+
     private void updateGradient() {
         if (mGradientColors == null || mGradientColors.length == 0)
             return;
         setGrad(getProgressDrawable(), mGradientColors);
         invalidate();
     }
-    
+
     public void setBackgroundGradientColors(int[] colors) {
     	mBackgroundColors = colors;
     	updateBackgroundGradient();
     }
-    
+
     private void updateBackgroundGradient() {
         if (mBackgroundColors == null || mBackgroundColors.length == 0)
             return;

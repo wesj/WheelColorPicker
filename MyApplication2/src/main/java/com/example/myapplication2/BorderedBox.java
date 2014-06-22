@@ -39,7 +39,7 @@ public class BorderedBox extends Drawable {
         mCenter.setColor(Color.RED);
         mCenter.setAntiAlias(true);
     }
-    
+
     @Override
     public void draw(Canvas canvas) {
         Rect bounds = getBounds();
