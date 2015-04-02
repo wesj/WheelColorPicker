@@ -10,6 +10,8 @@ import android.util.AttributeSet;
 
 public class SeekBar extends android.widget.SeekBar {
     private BorderedBox mThumb;
+    private int[] mBackgroundColors;
+    private int[] mGradientColors;
 
     public SeekBar(Context context) {
         super(context);
@@ -27,7 +29,7 @@ public class SeekBar extends android.widget.SeekBar {
     }
 
     private void init(Context context) {
-        mThumb = new BorderedBox();
+        mThumb = new BorderedBox(context);
         mThumb.setBorderThickness(5);
         mThumb.setBorderRadius(1f);
         mThumb.setShadowOffset(new PointF(0, 2));
@@ -36,25 +38,46 @@ public class SeekBar extends android.widget.SeekBar {
         setThumb(mThumb);
     }
 
-    public void setBackgroundGradientColors(int[] colors, int width) {
-        setGrad(getBackground(), colors, width);
+    @Override
+    protected void onSizeChanged (int w, int h, int oldw, int oldh) {
+    	super.onSizeChanged(w, h, oldw, oldh);
+    	updateGradient();
+    	updateBackgroundGradient();
+    }
+
+    public void setGradientColors(int[] colors) {
+        mGradientColors = colors;
+        updateGradient();
+    }
+
+    private void updateGradient() {
+        if (mGradientColors == null || mGradientColors.length == 0)
+            return;
+        setGradient(getProgressDrawable(), mGradientColors);
         invalidate();
     }
 
-    private void setGrad(Drawable d, int[] colors, int width) {
+    public void setBackgroundGradientColors(int[] colors) {
+    	mBackgroundColors = colors;
+    	updateBackgroundGradient();
+    }
+
+    private void updateBackgroundGradient() {
+        if (mBackgroundColors == null || mBackgroundColors.length == 0)
+            return;
+        setGradient(getBackground(), mBackgroundColors);
+        invalidate();
+    }
+
+    private void setGradient(Drawable d, int[] colors) {
         if (d == null)
             return;
 
-        LinearGradient lg = new LinearGradient(0f, 0f, width, 0f, colors, null, Shader.TileMode.CLAMP);
+        LinearGradient lg = new LinearGradient(0f, 0f, getWidth(), 0f, colors, null, Shader.TileMode.CLAMP);
         if (d instanceof BorderedBox)
             ((BorderedBox)d).setShader(lg);
         else if (d instanceof ShapeDrawable)
             ((ShapeDrawable)d).getPaint().setShader(lg);
-    }
-
-    public void setGradientColors(int[] colors, int width) {
-        setGrad(getProgressDrawable(), colors, width);
-        invalidate();
     }
 
     public void setThumbColor(int color) {

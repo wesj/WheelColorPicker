@@ -1,5 +1,6 @@
 package com.example.myapplication2;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -18,28 +19,27 @@ public class BorderedBox extends Drawable {
     private final Paint mBorderPaint;
     private final Paint mCenter;
     private float mRadius = 0;
-    private int mBorderWidth = 0;
     private PointF mShadowOffset = new PointF(0,0);
     private int mWidth = -1;
     private int mHeight = -1;
     private boolean mShadowInset;
 
-    public BorderedBox() {
+    public BorderedBox(Context context) {
         mShadowPaint = new Paint();
         mShadowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        mShadowPaint.setColor(Color.GRAY);
+        mShadowPaint.setColor(context.getResources().getColor(android.R.color.background_dark));
         mShadowPaint.setAntiAlias(true);
 
         mBorderPaint = new Paint();
         mBorderPaint.setStyle(Paint.Style.STROKE);
-        mBorderPaint.setColor(Color.WHITE);
+        mBorderPaint.setColor(context.getResources().getColor(android.R.color.background_light));
         mBorderPaint.setAntiAlias(true);
 
         mCenter = new Paint();
         mCenter.setColor(Color.RED);
         mCenter.setAntiAlias(true);
     }
-    
+
     @Override
     public void draw(Canvas canvas) {
         Rect bounds = getBounds();

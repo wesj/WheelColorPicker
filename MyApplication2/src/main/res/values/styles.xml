@@ -46,11 +46,18 @@
         <item name="android:layout_height">40sp</item>
         <item name="android:orientation">horizontal</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
     </style>
 
     <style name="Edit.Inner">
         <item name="android:background">@android:color/transparent</item>
         <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <style name="TextView">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
     </style>
 
 </resources>

@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.RemoteViews;
 
 /**
- * View group that lays out items in a cirlce. Dragging on the view will rotate the items around the circle
+ * View group that lays out items in a circle. Dragging on the view will rotate the items around the circle
  */
 @RemoteViews.RemoteView
 public class Wheel extends ViewGroup {
@@ -226,7 +226,6 @@ public class Wheel extends ViewGroup {
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() != GONE) {
-                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
                 child.layout(cx, cy, cx + mRadius, cy + 2*mSliceHeight);
             }
         }
@@ -259,11 +258,8 @@ public class Wheel extends ViewGroup {
     public void setSelectedSegment(int i) {
         int count = getChildCount();
         int angle = 360 / count;
-        if (mAnimator != null)
+        if (mAnimator != null) {
             mAnimator.endAnimation();
-
-        if (Build.VERSION.SDK_INT >= 11) {
-            setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }
         mAnimator = new WheelAnimator((180 - angle * i + angle / 2)%360);
     }
@@ -312,9 +308,6 @@ public class Wheel extends ViewGroup {
             mRotation = mEnd;
             notifyListeners();
             mAnimator = null;
-            if (Build.VERSION.SDK_INT >= 11) {
-                setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-            }
         }
 
         @Override
@@ -338,13 +331,9 @@ public class Wheel extends ViewGroup {
     }
 
     private boolean startDrag(MotionEvent event) {
-        if (mAnimator != null)
+        if (mAnimator != null) {
             mAnimator.endAnimation();
-
-        if (Build.VERSION.SDK_INT >= 11) {
-            setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }
-
         mStartDragRotation = getAngle(event);
         return true;
     }
